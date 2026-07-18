@@ -1,105 +1,97 @@
 ---
-title: "Developer Environment and Onboarding (~20–28 hours)"
-excerpt: "<strong>Estimated effort: ~20–28 hours.</strong> Improved Swayable onboarding through Docker runtime alignment, environment examples, service documentation, and diagnosis of schema-dependent Cypress setup failures.<br/><img src='/images/500x300.png'>"
+title: "AI Feature Rollout and Access (~5–8 hours)"
+excerpt: "<strong>Estimated effort: ~5–8 hours.</strong> Removed a redundant AI Toplines feature flag, verified data-driven rendering, and supported controlled access to AI summaries and presentation capabilities.<br/><img src='/images/500x300.png'>"
 collection: portfolio
 ---
 
-**Estimated effort: ~20–28 hours**
+**Estimated effort: ~5–8 hours**
 
 ## Project Overview
 
-My first productive engineering work at Swayable depended on making a multi-service local environment understandable and repeatable. The relevant record includes onboarding tickets ENG-1054 and ENG-1055, documentation tickets ENG-1082 and ENG-1120, retrospective items RET-174, RET-214, and RET-287, merged pull requests sway #8, swaypi #1637, and swayable-data #2727, and the later diagnostic pull request sway #49. Together, these items show a progression from setting up individual services to improving the shared instructions and then reasoning about failures that appeared only when Docker, database schemas, and Cypress interacted.
+This supporting project documents a small but meaningful part of AI productization at Swayable: moving an AI-generated results component from feature-flag control toward data-driven availability. The work is represented by ENG-1024, ENG-2289, and merged ui pull request #1991. The authored code change was intentionally small: one addition and five deletions across a Vue component and the feature-flag constants file. I do not present it as an AI model implementation. Its value was in rollout behavior, access control, verification, and the transition from experimental gating to normal product logic.
 
-Swayable’s development environment spans a Node.js API, a Python data service, MongoDB, Redis, background workers, user-interface services, and Docker orchestration. Onboarding was therefore not a matter of installing one package and running one command. Environment variables had to point to compatible local services, container images had to use supported runtimes, and startup order mattered. RET-174, for example, records a concrete documentation problem: Celery required Redis, but the Redis instructions appeared after the Celery steps. RET-214 records collaborative help with the local environment, and RET-287 records successful local Docker testing.
+The AI Toplines interface displayed generated summaries for treatments with stored toplines data. Before ENG-1024, a feature flag also controlled whether the component appeared. The ticket’s proposal observed that the widget already had a natural product-level condition: when the relevant insights data existed, it should render; when no data existed, it should not. Maintaining an additional flag introduced a second gate that could hide valid output and required ongoing configuration.
 
-The goal of this theme was not to redesign the development platform. My contribution was to reduce specific sources of setup ambiguity, align one container runtime, and document configuration that the services already expected. I also diagnosed a schema-upgrade gap in the end-to-end test path. Because sway #49 was closed without merge, I treat it as evidence of technical diagnosis and learning, not as a shipped change in the `sway` repository.
+I removed the redundant flag and preserved the data-presence condition. I tested both required cases: a result with toplines data displayed the AI summary, while a result without toplines data did not display an empty summary panel. The change merged on October 15, 2025.
+
+ENG-2289 later involved enabling AI summaries, selected toplines, and a presentation capability for an authorized use case under a short operational timeline. There is no authored pull request linked to that ticket, so I treat it as rollout and access-support evidence rather than as a code contribution.
 
 ## Technical Approach
 
-### Learning the service graph through setup
+### Simplifying the rendering condition
 
-ENG-1054 and ENG-1055 tracked setup of `swaypi` and `swayable-data`. Completing these tasks required understanding which processes were independent and which were prerequisites. The API depended on MongoDB and environment-specific URLs. The Python service used Flask configuration and could dispatch background tasks that required a broker. Docker provided repeatable infrastructure, but the application processes still depended on valid `.env` values and compatible runtime versions.
+The technical approach was subtraction. The component previously combined feature-flag status with the existence of generated data. After the change, rendering depended on whether toplines data existed. I also removed the now-unused flag constant. In conceptual form:
 
-I treated setup errors as information about architecture. A connection failure could indicate a missing container, an incorrect host name, a wrong port, or startup order. A worker failure could indicate that Redis was not running rather than a Python defect. This approach prevented me from adding arbitrary configuration until a command happened to work. Instead, I traced each service to its documented dependency and then updated documentation where the observed dependency was absent or out of order.
+```text
+before:
+show_summary = feature_flag_enabled AND toplines_data_exists
 
-### Making environment examples executable documentation
+after:
+show_summary = toplines_data_exists
+```
 
-In swaypi #1637, corresponding to ENG-1082, I updated `.env.example` and the README with logging options, MongoDB connection alternatives, application URLs, and the API port variable. The pull request added 30 lines and removed four from the example file, plus a small README update. The important outcome was not the line count. An environment example acts as an interface between a repository and a new developer, so names and grouping must match the application’s actual configuration surface.
+This was appropriate because ENG-1024 explicitly defined the desired behavior in terms of data. The feature was no longer being evaluated through a limited cohort in this path; the presence of generated output determined whether there was anything meaningful to show.
 
-In swayable-data #2727, corresponding to ENG-1120, I added eight Flask-related variables to `.env.example`. This corrected a mismatch where configuration was described in documentation but not represented in the file developers copy when constructing a local environment. Keeping these sources aligned reduced the chance that a developer would follow the README yet still start the service without required values.
+Removing a flag is not equivalent to displaying the component unconditionally. The data guard remained essential. Without it, the interface could show an empty or misleading AI section for treatments that had no generated summary. The acceptance criteria therefore required paired tests rather than a single confirmation that the feature could appear.
 
-I did not place credentials or production values in these examples. The work documented variable names and safe local structure, preserving the distinction between configuration guidance and secret distribution.
+### Verifying positive and negative states
 
-### Aligning the Docker runtime
+The pull request documented two test fixtures: one with stored toplines and one without them. I navigated to each result, opened a treatment, and checked the side panel. This positive-negative structure was more informative than testing only the visible case. It demonstrated both availability and graceful absence.
 
-Sway #8 updated the Node.js version in three Docker Compose files: the install, test, and standard development definitions. The change was three additions and three deletions and merged in February 2026. Applying the version consistently mattered because different Compose entry points should not silently test or install under a different runtime from the one used for normal development.
+I also reviewed the flag constant usage so that removing the constant would not leave a stale import or another hidden dependency. The final diff changed two files and removed more code than it added, which was consistent with retiring rollout infrastructure rather than introducing a new behavior branch.
 
-This task reinforced the principle that runtime declarations are part of the build contract. A developer can have the correct Node.js version on the host and still experience inconsistent behavior if the container definition pins another version. Updating all three Compose paths reduced that category of drift.
+### Supporting controlled access
 
-### Diagnosing schema-dependent Cypress failures
+ENG-2289 requested that several AI-related capabilities be available for a particular authorized workflow, including summaries, selected toplines dimensions, and a dashboard presentation view. The ticket was completed after review. The available evidence does not establish an authored code change, a generalized release to every organization, or changes to the underlying NLP generation process. I therefore describe my role as supporting access and rollout verification for the requested case.
 
-The most technically instructive environment issue appeared later in sway #49. Cypress setup tests attempted to write a newly introduced field. The Mongoose model and branch-level JSON schema included that field, but the preloaded MongoDB image used by continuous integration carried validators built from the main branch. Because those validators rejected additional properties, the UI-to-API-to-database path failed with document validation even though unit tests were green.
-
-I identified `schema:upgrade` as the operation that synchronized live validators with repository schemas and proposed running it after the end-to-end stack started. The proposal was idempotent and targeted the gap between a preloaded database image and branch-specific schema changes. However, pull request #49 was closed without merge. I therefore do not claim that I shipped this workflow change. Its portfolio value is the diagnosis: the failure was not fundamentally a Cypress selector problem or an application model problem; it was version skew between a branch and the validator state inside test infrastructure.
-
-That diagnosis also informed later sampling work. It explained why a user-facing field could pass unit tests yet fail only when Cypress exercised a real database write. I reference that reliability lesson under sampling and environment practice, while preserving the distinction between proposed and merged work.
+This distinction matters because AI products have at least three separate layers: generation, storage, and presentation. The work here primarily concerned presentation and availability. A summary could be generated correctly and stored in the database but remain invisible because of a UI gate. Conversely, removing a gate should not fabricate output when generation has not occurred.
 
 ## MSHLT Learning Outcomes
 
 ### 1. Programming Skills for the Workplace
 
-I developed practical skill in configuring and testing polyglot services. I used repository conventions, made small reviewable pull requests, and updated examples alongside documentation. I learned to verify a change through the same execution path a teammate would use rather than assuming that syntactically valid configuration was sufficient.
+I practiced making a narrow production change, removing obsolete configuration, checking dependent usage, and documenting concrete test cases. The task reinforced that deletion can be a feature change: reducing conditional branches can make behavior easier to reason about, but only when the remaining condition accurately represents the product requirement.
 
-### 2. Fundamental NLP and Data-System Concepts
+### 2. Fundamental NLP Algorithms and Concepts
 
-Although this theme did not implement an NLP algorithm, it established the operational foundation for running analysis services. Background language-processing and statistical tasks depend on a broker, worker processes, database connectivity, and reproducible package environments. The schema diagnosis also demonstrated a core data-engineering concept: application models and database validators are separate layers that must evolve together.
+This work connected NLP output to product delivery rather than creating a new algorithm. AI Toplines are generated language artifacts stored as insights and presented in a results interface. I learned to separate model availability from output availability. The interface should render based on a valid stored result, while model execution, quality evaluation, and persistence belong to other parts of the pipeline. This separation prevents a presentation-layer change from being misrepresented as a model improvement.
+
+Feature rollout also relates to responsible NLP productization. Generated text should appear only where output exists and where access is intended. A data-presence guard avoids an empty claim of AI capability, while controlled rollout allows teams to verify that generated material reaches the correct product surface.
 
 ### 3. Tools and Packages
 
-The work involved Docker Compose, Node.js, Yarn, Python, Flask, Celery, Redis, MongoDB, Mongoose models, JSON Schema validators, Cypress, `.env` conventions, local logging configuration, and GitHub Actions-style continuous-integration flows. I used these tools as an integrated system rather than as isolated technologies.
+The implementation involved Vue component logic, JavaScript feature-flag constants, stored insights data, branch preview environments, GitHub review, and manual positive-negative UI verification. Linear provided acceptance criteria and rollout context. No new model library, prompt framework, or inference service was added in this pull request.
 
 ### 4. Workplace Communication and Collaboration
 
-Onboarding required asking focused questions and converting answers into reusable documentation. RET-214 records collaborative local-development help, while RET-174 records a precise ordering problem in the instructions. I learned to report setup friction as a reproducible dependency issue rather than as a general statement that the environment did not work. That level of specificity makes documentation feedback actionable.
+I documented the exact behavioral matrix for reviewers: data present means the AI summary is visible; data absent means it is not. For the later access request, I worked within the stated operational timeline and treated feature availability as an observable deliverable. I also learned to communicate the limits of the change clearly so that stakeholders did not confuse UI availability with changes to model quality or generation coverage.
 
 ## Challenges
 
-The evidence supports three specific challenges. First, the service dependency order was not fully reflected in onboarding instructions. RET-174 states that Celery required Redis while the Redis steps appeared later. This supports a documentation-ordering claim, but it does not support a claim that all onboarding documentation was incomplete.
+The principal challenge was deciding whether the feature flag still represented a meaningful rollout decision. ENG-1024 states that the widget already did not appear when no insights existed and proposed removing the `ai-top-lines` flag. Pull request #1991 implemented that specific proposal and documented both data states. This evidence supports a redundant-gate removal; it does not support a broader claim that every AI feature flag was removed.
 
-Second, configuration information was split between prose and example files. ENG-1082 and ENG-1120, together with merged pull requests #1637 and #2727, show exactly which categories were added: logging, MongoDB, URLs, a service port, and Flask variables. These merged changes support improved discoverability for those settings.
+A second challenge was avoiding an unconditional interface. The merged change retained data-based behavior, and the pull request included screenshots and test cases for results with and without toplines. The evidence supports correct rendering for those acceptance cases, not a quantitative evaluation of generated-summary quality.
 
-Third, branch-specific database schema changes were incompatible with validators in a preloaded test image until an upgrade step ran. Pull request #49 documents the observed `additionalProperties` validation failure and the proposed idempotent upgrade. Since the pull request was closed without merge, the evidence supports diagnosis and a proposed remedy only. It does not support describing the schema upgrade as part of the shipped `sway` test workflow.
+ENG-2289 introduced an operational access challenge under a short timeline. The ticket lists multiple AI capabilities and was completed after review. Since there is no authored pull request attached, I cannot attribute a code implementation or disclose internal configuration actions. The defensible claim is that I supported and verified availability for the requested workflow.
 
 ## Outcomes
 
-Three changes shipped: consistent Node.js container versions across three Compose definitions, an expanded `swaypi` environment example and README, and Flask variables in the `swayable-data` environment example. The setup tickets for both services were completed, and the retrospective record later documented successful local testing with Docker.
+UI pull request #1991 merged with a net reduction of four lines. Treatments with stored toplines data could display the AI summary without the retired flag, and treatments without the data continued to omit the summary. The obsolete flag constant was removed, reducing one source of configuration drift.
 
-The broader outcome was a more accurate mental model of the system. I learned how local API, data, database, broker, worker, and browser-test layers fit together. That understanding supported later feature and reliability work because I could reproduce production-like state locally, interpret failures at the correct layer, and write QA steps that other engineers could follow.
-
-I cannot quantify a reduction in onboarding time from the available evidence, and I do not present the closed schema proposal as deployed. The documented outcome is narrower: specific setup information was added, a runtime mismatch was corrected, local Docker testing succeeded, and a difficult end-to-end schema failure received an evidence-based root-cause analysis.
+The later access ticket reached completion for the requested AI capabilities. Together, the two records show two phases of rollout: simplifying a general UI gate and supporting availability for a time-sensitive use case. The scope remains modest, but it is a real part of moving an AI feature from development into a dependable product experience.
 
 ## Professional Practice
 
-This work taught me that onboarding is an engineering activity. A new developer follows interfaces that the team maintains: Compose files, example environments, READMEs, task recipes, and database bootstrap behavior. If those interfaces disagree, the developer bears the integration cost. Improving them creates leverage beyond one person, even when the code diff is small.
+This project taught me to evaluate AI work across the full delivery chain. A model feature is not useful merely because an inference exists. Its output must be stored, made available to the correct users, rendered only when valid, and tested in both presence and absence states.
 
-I also learned to preserve status distinctions in technical reporting. A merged environment change can be described as an outcome. A closed pull request can be described as investigation, diagnosis, or a proposal, but not as shipped behavior. This distinction is important in a professional portfolio because an honest account of a well-supported diagnosis is stronger than an inflated implementation claim.
+I also learned to value small maintenance changes. Feature flags are valuable during staged rollout, but stale flags accumulate branches and configuration obligations. Removing one should be deliberate, reviewed, and paired with a replacement rule that is easy to explain. Here, “show valid stored output when it exists” was simpler and aligned with the documented requirement.
+
+Finally, I practiced honest scope. The code change did not improve an NLP model, generate new toplines, or measure summary quality. It improved the product path through which existing AI output became visible. That distinction makes the entry more accurate and illustrates how software engineering supports NLP productization beyond model code.
 
 ## Code Reference
 
-The repositories are private. Authorized viewers can review:
+The implementation is in a private repository:
 
-- [sway #8 — align Node.js runtime in Docker Compose](https://github.com/swayable/sway/pull/8)
-- [swaypi #1637 — update README and environment example](https://github.com/swayable/swaypi/pull/1637)
-- [swayable-data #2727 — add Flask variables to environment example](https://github.com/swayable/swayable-data/pull/2727)
-- [sway #49 — schema upgrade before Cypress, closed without merge](https://github.com/swayable/sway/pull/49)
+- [ui #1991 — remove the AI Toplines feature flag](https://github.com/swayable/ui/pull/1991)
 
-The environment reasoning can be summarized with sanitized pseudocode:
-
-```text
-start(database, broker)
-apply(current_branch_database_schemas)
-start(api, data_service, workers)
-run(browser_tests)
-```
-
-This sequence is conceptual. The proposed automatic schema step in sway #49 was not merged.
+ENG-1024 is linked to that merged pull request. ENG-2289 is a private operational ticket with no authored pull request linked to this portfolio theme.

@@ -1,0 +1,16 @@
+---
+description: Resume context for MSHLT internship portfolio site work
+alwaysApply: true
+---
+
+# Internship portfolio resume
+
+When working on this Jekyll site or internship documentation:
+
+1. Read `~/dev/uaz/internship-reqs/HANDOFF.md` first for full task state.
+2. Follow `~/.claude/commands/internship.md` for writing/updating portfolio entries.
+3. Topic groupings live in `~/dev/uaz/internship-reqs/portfolio-groups.yaml` (not the Cursor canvas).
+4. Academic requirements: PDFs in `~/dev/uaz/internship-reqs/` (syllabus, checklist, website rubric).
+5. Do not commit or push unless Ashton explicitly asks; he writes internship commit messages.
+6. Local serve: `RUBYOPT="-r$PWD/ruby4_compat" bundle exec jekyll liveserve` with Homebrew Ruby on PATH.
+7. Live URL: https://anlevier.github.io — local: http://127.0.0.1:4000

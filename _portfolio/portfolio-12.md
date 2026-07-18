@@ -1,110 +1,105 @@
 ---
-title: "Survey Setup Usability Improvements (~25–32 hours)"
-excerpt: "<strong>Estimated effort: ~25–32 hours.</strong> Improved survey configuration and respondent usability through custom instructions, visible treatment dependencies, viewport-safe video, and bulk segment-to-filter actions."
+title: "Developer Environment and Onboarding (~20–28 hours)"
+excerpt: "<strong>Estimated effort: ~20–28 hours.</strong> Improved Swayable onboarding through Docker runtime alignment, environment examples, service documentation, and diagnosis of schema-dependent Cypress setup failures.<br/><img src='/images/500x300.png'>"
 collection: portfolio
 ---
 
-**Estimated effort: ~25–32 hours** (COR-188, COR-227, COR-360, and COR-466)
+**Estimated effort: ~20–28 hours**
 
 ## Project Overview
 
-I completed four Swayable improvements that addressed friction at different points in survey setup and delivery. Content authors needed to understand and override default respondent instructions. Customer Success users needed to see treatment dependencies without opening every question. Respondents viewing portrait media needed the survey controls to remain reachable. Analysts configuring results needed a faster way to promote several segments into filters.
+My first productive engineering work at Swayable depended on making a multi-service local environment understandable and repeatable. The relevant record includes onboarding tickets ENG-1054 and ENG-1055, documentation tickets ENG-1082 and ENG-1120, retrospective items RET-174, RET-214, and RET-287, merged pull requests sway #8, swaypi #1637, and swayable-data #2727, and the later diagnostic pull request sway #49. Together, these items show a progression from setting up individual services to improving the shared instructions and then reasoning about failures that appeared only when Docker, database schemas, and Cypress interacted.
 
-These tasks did not form one new subsystem, but they shared a usability principle: important state and actions should be visible at the moment a person needs them. Hidden defaults, hidden dependencies, off-screen controls, and repetitive import workflows all increase the chance of configuration errors. I worked within the existing Vue components, stores, API quiz builder, and test patterns to make those states explicit.
+Swayable’s development environment spans a Node.js API, a Python data service, MongoDB, Redis, background workers, user-interface services, and Docker orchestration. Onboarding was therefore not a matter of installing one package and running one command. Environment variables had to point to compatible local services, container images had to use supported runtimes, and startup order mattered. RET-174, for example, records a concrete documentation problem: Celery required Redis, but the Redis instructions appeared after the Celery steps. RET-214 records collaborative help with the local environment, and RET-287 records successful local Docker testing.
 
-For custom instructions, the setup editor displays the default respondent instruction as a placeholder and permits an author-provided override. The quiz-building API renders either the custom value or the established default behavior. For dependency visibility, the question list now shows a distinct treatment-dependency icon and a tooltip that names included or excluded treatments. For media sizing, the video player detects portrait orientation and caps its height to the available viewport. For segments, a bulk action converts selected basic or compound segments into filters while preserving order and avoiding duplicates.
+The goal of this theme was not to redesign the development platform. My contribution was to reduce specific sources of setup ambiguity, align one container runtime, and document configuration that the services already expected. I also diagnosed a schema-upgrade gap in the end-to-end test path. Because sway #49 was closed without merge, I treat it as evidence of technical diagnosis and learning, not as a shipped change in the `sway` repository.
 
 ## Technical Approach
 
-The custom-instructions work crossed the setup UI and quiz-building API. I added locale-aware default instruction data, queried the quiz text needed for the current language, and placed the default in the input placeholder. User-entered content continued through the survey setup store. The API changed the final instruction selection so that a custom value takes precedence over the generated default. This allowed authors to preview the distinction between leaving the input untouched and supplying explicit respondent-facing copy.
+### Learning the service graph through setup
 
-A sanitized form of the selection rule is:
+ENG-1054 and ENG-1055 tracked setup of `swaypi` and `swayable-data`. Completing these tasks required understanding which processes were independent and which were prerequisites. The API depended on MongoDB and environment-specific URLs. The Python service used Flask configuration and could dispatch background tasks that required a broker. Docker provided repeatable infrastructure, but the application processes still depended on valid `.env` values and compatible runtime versions.
 
-```javascript
-const instructions =
-  content.customInstructions !== undefined
-    ? content.customInstructions
-    : localizedDefaults.contentInstructions
-```
+I treated setup errors as information about architecture. A connection failure could indicate a missing container, an incorrect host name, a wrong port, or startup order. A worker failure could indicate that Redis was not running rather than a Python defect. This approach prevented me from adding arbitrary configuration until a command happened to work. Instead, I traced each service to its documented dependency and then updated documentation where the observed dependency was absent or out of order.
 
-The production representation differs, but the ordering is central: use the configured text when supplied, otherwise use the localized default. I verified the respondent preview and documented language-specific QA through the quiz URL.
+### Making environment examples executable documentation
 
-For treatment dependencies, I added an icon component based on the approved design and integrated it beside the existing question-dependency indicator. The question list inspects included and excluded treatment identifiers, resolves names from setup data, and constructs a tooltip such as “Only shown to [treatment]” or “Hidden from [treatment].” When both dependency types exist, both icons remain visible side by side. The PR deliberately recorded that no automated tests were added because the existing indicator lacked a component-test harness; verification used targeted local data, screenshots, and tooltip QA. I preserve that limitation rather than implying automated coverage.
+In swaypi #1637, corresponding to ENG-1082, I updated `.env.example` and the README with logging options, MongoDB connection alternatives, application URLs, and the API port variable. The pull request added 30 lines and removed four from the example file, plus a small README update. The important outcome was not the line count. An environment example acts as an interface between a repository and a new developer, so names and grouping must match the application’s actual configuration surface.
 
-For portrait media, I followed the viewport calculation already used by other quiz content. The video player applies a maximum height and switches intrinsic sizing according to aspect ratio. Stored dimensions are preferred, while `loadedmetadata` provides a fallback for older video records with no dimensions. A simplified version is:
+In swayable-data #2727, corresponding to ENG-1120, I added eight Flask-related variables to `.env.example`. This corrected a mismatch where configuration was described in documentation but not represented in the file developers copy when constructing a local environment. Keeping these sources aligned reduced the chance that a developer would follow the README yet still start the service without required values.
 
-```javascript
-const ratio = storedRatio || naturalVideoWidth / naturalVideoHeight
-const sizeClass = ratio < 1 ? "max-width-full height-auto" : "width-full"
-const viewportClass = "max-height-available-viewport"
-```
+I did not place credentials or production values in these examples. The work documented variable names and safe local structure, preserving the distinction between configuration guidance and secret distribution.
 
-The merged PR also applied an image thumbnail clamp. Subsequent evidence on COR-360 links a hotfix that reverted the image clamp to restore article scrolling while retaining the video correction. I therefore claim the durable video viewport behavior and the original investigation of both media types, not that my first image rule remained the final product behavior.
+### Aligning the Docker runtime
 
-The segment-to-filter action reused the existing bulk-selection toolbar and setup-store write path. For each checked segment, it determines whether a filter already references that segment, skips duplicates, and appends new filters with sort orders after the current maximum. It then clears selection, matching adjacent Combine and Remove actions. Tests cover basic and compound segments, multiple selected items, monotonically increasing order, duplicate avoidance, and selection cleanup.
+Sway #8 updated the Node.js version in three Docker Compose files: the install, test, and standard development definitions. The change was three additions and three deletions and merged in February 2026. Applying the version consistently mattered because different Compose entry points should not silently test or install under a different runtime from the one used for normal development.
 
-```javascript
-let nextOrder = maximumExistingOrder(filters) + 1
-for (const segment of checkedSegments) {
-  if (!filters.some((filter) => filter.segmentId === segment.id)) {
-    filters.push({ segmentId: segment.id, sortOrder: nextOrder++ })
-  }
-}
-checkedSegments.clear()
-```
+This task reinforced the principle that runtime declarations are part of the build contract. A developer can have the correct Node.js version on the host and still experience inconsistent behavior if the container definition pins another version. Updating all three Compose paths reduced that category of drift.
 
-This sanitized snippet omits proprietary store and schema details while showing the implemented invariants.
+### Diagnosing schema-dependent Cypress failures
+
+The most technically instructive environment issue appeared later in sway #49. Cypress setup tests attempted to write a newly introduced field. The Mongoose model and branch-level JSON schema included that field, but the preloaded MongoDB image used by continuous integration carried validators built from the main branch. Because those validators rejected additional properties, the UI-to-API-to-database path failed with document validation even though unit tests were green.
+
+I identified `schema:upgrade` as the operation that synchronized live validators with repository schemas and proposed running it after the end-to-end stack started. The proposal was idempotent and targeted the gap between a preloaded database image and branch-specific schema changes. However, pull request #49 was closed without merge. I therefore do not claim that I shipped this workflow change. Its portfolio value is the diagnosis: the failure was not fundamentally a Cypress selector problem or an application model problem; it was version skew between a branch and the validator state inside test infrastructure.
+
+That diagnosis also informed later sampling work. It explained why a user-facing field could pass unit tests yet fail only when Cypress exercised a real database write. I reference that reliability lesson under sampling and environment practice, while preserving the distinction between proposed and merged work.
 
 ## MSHLT Learning Outcomes
 
 ### 1. Programming Skills for the Workplace
 
-I delivered four reviewed tickets in a mature product repository and one supporting API change. I adapted to different levels of testability, used existing components and stores, preserved unrelated behavior, and documented QA precisely. The work ranged from a one-line API selection change to a stateful bulk operation with unit tests. This variety reflects workplace maintenance and feature development more accurately than a single greenfield assignment.
+I developed practical skill in configuring and testing polyglot services. I used repository conventions, made small reviewable pull requests, and updated examples alongside documentation. I learned to verify a change through the same execution path a teammate would use rather than assuming that syntactically valid configuration was sufficient.
 
-### 2. User-Centered Software Design
+### 2. Fundamental NLP and Data-System Concepts
 
-I learned to identify usability problems as mismatches between system state and user visibility. A default instruction that appears only in the respondent flow is hidden state. A treatment dependency visible only inside a side panel is hidden state. A selected segment that requires repeated import actions is visible but operationally expensive. Each solution moved information or action closer to its decision point.
+Although this theme did not implement an NLP algorithm, it established the operational foundation for running analysis services. Background language-processing and statistical tasks depend on a broker, worker processes, database connectivity, and reproducible package environments. The schema diagnosis also demonstrated a core data-engineering concept: application models and database validators are separate layers that must evolve together.
 
-### 3. Human Language Technology and NLP Concepts
+### 3. Tools and Packages
 
-The custom-instructions slice handled localized human-facing text, but it did not implement NLP. I worked with language selection and default instructional strings, not language identification, machine translation, parsing, or text generation. The PR documented manual verification with a French locale, but the existing platform supplied localization behavior. My contribution was to retrieve and present the appropriate default and preserve an author override. I make no claim of building a multilingual NLP system.
+The work involved Docker Compose, Node.js, Yarn, Python, Flask, Celery, Redis, MongoDB, Mongoose models, JSON Schema validators, Cypress, `.env` conventions, local logging configuration, and GitHub Actions-style continuous-integration flows. I used these tools as an integrated system rather than as isolated technologies.
 
-### 4. Testing and Empirical Evaluation
+### 4. Workplace Communication and Collaboration
 
-I used different evidence according to the change. Segment conversion received detailed unit tests because it contained ordering, duplicate, and state-reset logic. Custom instructions used setup tests plus end-to-end preview steps. Dependency icons used controlled fixture data and visual QA, with the absence of automated coverage stated in the PR. Media sizing used before-and-after viewport checks across portrait, landscape, missing-dimension, desktop, and mobile cases. The later image hotfix also showed the importance of evaluating interactions beyond the initial acceptance case.
+Onboarding required asking focused questions and converting answers into reusable documentation. RET-214 records collaborative local-development help, while RET-174 records a precise ordering problem in the instructions. I learned to report setup friction as a reproducible dependency issue rather than as a general statement that the environment did not work. That level of specificity makes documentation feedback actionable.
 
 ## Challenges
 
-The custom-instructions requirement contained a data-model constraint: the platform did not store the default instruction as a configured value, so blank historically meant “use default.” COR-188 records the compromise of displaying the default as a placeholder while allowing entered text to override it. The implementation did not redefine every blank-value semantic; it made the existing fallback understandable in the editor and connected custom text to the respondent rendering path.
+The evidence supports three specific challenges. First, the service dependency order was not fully reflected in onboarding instructions. RET-174 states that Celery required Redis while the Redis steps appeared later. This supports a documentation-ordering claim, but it does not support a claim that all onboarding documentation was incomplete.
 
-Treatment dependencies required meaningful tooltips from identifier arrays. PR #2291 documents three QA cases: included treatment, excluded treatment, and a question containing both question and treatment dependencies. It also records that no automated tests covered the pre-existing question-dependency indicator. The evidence supports successful visual and tooltip verification, but not a claim of automated regression coverage for that component.
+Second, configuration information was split between prose and example files. ENG-1082 and ENG-1120, together with merged pull requests #1637 and #2727, show exactly which categories were added: logging, MongoDB, URLs, a service port, and Flask variables. These merged changes support improved discoverability for those settings.
 
-Media sizing presented a cross-content regression risk. PR #2277 constrained both video and image displays and verified portrait and landscape cases. The later linked hotfix reverted the image clamp because it interfered with article scrolling. This is evidence that a CSS rule that succeeds for one media shape can alter another content interaction. The durable lesson was to apply constraints at the narrowest component level and test scroll behavior, not only final dimensions.
-
-The bulk segment action had to preserve filter order and remain idempotent. PR #2436 records tests for multi-select ordering, basic and compound segments, duplicate skipping, and clearing selection. These tests are direct evidence for the behavior and reduce the risk that repeated use creates duplicate filters or unstable display order.
+Third, branch-specific database schema changes were incompatible with validators in a preloaded test image until an upgrade step ran. Pull request #49 documents the observed `additionalProperties` validation failure and the proposed idempotent upgrade. Since the pull request was closed without merge, the evidence supports diagnosis and a proposed remedy only. It does not support describing the schema upgrade as part of the shipped `sway` test workflow.
 
 ## Outcomes
 
-The custom instruction UI and API changes merged in April 2026. Authors can see the default instruction while editing and supply content-specific text that reaches the respondent experience. The dependency indicator merged later that month and gives Customer Success users an at-a-glance view of treatment-based routing, including human-readable treatment names.
+Three changes shipped: consistent Node.js container versions across three Compose definitions, an expanded `swaypi` environment example and README, and Flask variables in the `swayable-data` environment example. The setup tickets for both services were completed, and the retrospective record later documented successful local testing with Docker.
 
-The portrait video correction keeps tall video within the respondent viewport and uses metadata fallback when stored dimensions are unavailable. The original image constraint was later narrowed by a separate hotfix, so I report that evolution explicitly. The bulk segment-to-filter action merged in July 2026 and changes a repeated one-segment workflow into one selection-and-action operation with duplicate protection.
+The broader outcome was a more accurate mental model of the system. I learned how local API, data, database, broker, worker, and browser-test layers fit together. That understanding supported later feature and reliability work because I could reproduce production-like state locally, interpret failures at the correct layer, and write QA steps that other engineers could follow.
 
-Together, these changes reduced ambiguity and interaction cost in setup while improving the accessibility of the respondent flow. They are focused improvements within a larger platform, not a claim that I created the full survey editor or quiz experience.
+I cannot quantify a reduction in onboarding time from the available evidence, and I do not present the closed schema proposal as deployed. The documented outcome is narrower: specific setup information was added, a runtime mismatch was corrected, local Docker testing succeeded, and a difficult end-to-end schema failure received an evidence-based root-cause analysis.
 
 ## Professional Practice
 
-I used acceptance criteria, Figma assets, established UI patterns, preview environments, controlled local data, and focused tests. I preserved authorship when continuing the segment action from an earlier spike and documented that history in the pull request. I also recorded testing gaps and later behavior changes rather than presenting every first implementation as final.
+This work taught me that onboarding is an engineering activity. A new developer follows interfaces that the team maintains: Compose files, example environments, READMEs, task recipes, and database bootstrap behavior. If those interfaces disagree, the developer bears the integration cost. Improving them creates leverage beyond one person, even when the code diff is small.
 
-The media follow-up is especially important professional evidence. A merged change can reveal an interaction outside the original test matrix. Accurate engineering communication requires acknowledging the correction and narrowing the portfolio claim to the behavior that remained. This practice gives reviewers a more reliable account than a larger but outdated claim.
+I also learned to preserve status distinctions in technical reporting. A merged environment change can be described as an outcome. A closed pull request can be described as investigation, diagnosis, or a proposal, but not as shipped behavior. This distinction is important in a professional portfolio because an honest account of a well-supported diagnosis is stronger than an inflated implementation claim.
 
 ## Code Reference
 
-The relevant private pull requests are:
+The repositories are private. Authorized viewers can review:
 
-- [UI #2234 — custom content instructions](https://github.com/swayable/ui/pull/2234)
-- [swaypi #1720 — respondent instruction selection](https://github.com/swayable/swaypi/pull/1720)
-- [UI #2291 — treatment dependency indicator](https://github.com/swayable/ui/pull/2291)
-- [UI #2277 — viewport constraints for portrait media](https://github.com/swayable/ui/pull/2277)
-- [UI #2436 — bulk “Add as Filter” action](https://github.com/swayable/ui/pull/2436)
+- [sway #8 — align Node.js runtime in Docker Compose](https://github.com/swayable/sway/pull/8)
+- [swaypi #1637 — update README and environment example](https://github.com/swayable/swaypi/pull/1637)
+- [swayable-data #2727 — add Flask variables to environment example](https://github.com/swayable/swayable-data/pull/2727)
+- [sway #49 — schema upgrade before Cypress, closed without merge](https://github.com/swayable/sway/pull/49)
 
-Representative files include the content details editor, locale constants and quiz query, `TreatmentDependencyIcon.vue`, the survey-question list, `VideoPlayer.vue`, quiz image content, `SurveySetupSegments.vue`, and its unit specification.
+The environment reasoning can be summarized with sanitized pseudocode:
+
+```text
+start(database, broker)
+apply(current_branch_database_schemas)
+start(api, data_service, workers)
+run(browser_tests)
+```
+
+This sequence is conceptual. The proposed automatic schema step in sway #49 was not merged.

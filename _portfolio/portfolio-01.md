@@ -38,19 +38,19 @@ For experimental work, I treated evaluation and architectural feedback as outcom
 
 The internship is organized into the following theme pages:
 
-1. [Substantiveness Classification Pipeline — ~120–150 hours](/portfolio/portfolio-4/). I built a multi-stage LLM pipeline for question intent, response type, and substantiveness classification with schema, Celery, API, prompt, and batch-runner work.
-2. [Sentiment and Relevance Automation — ~35–45 hours](/portfolio/portfolio-5/). I hardened inherited classifier work into a scheduled, observable, retryable Celery pipeline.
-3. [Autoprogram: Google Doc Question Extraction — ~40–50 hours](/portfolio/portfolio-6/). I developed and evaluated an unmerged information-extraction prototype and documented why the next architecture should change.
-4. [Article Highlighter Collection — ~45–55 hours](/portfolio/portfolio-7/). I implemented major full-stack layers for collecting structured human text-span annotations.
-5. [Launch-Page Autosave — ~12–16 hours](/portfolio/portfolio-8/). I built concurrency-safe persistence and unified save-state feedback.
-6. [Enterprise Self-Serve and Test Designs — ~35–45 hours](/portfolio/portfolio-9/). I contributed role-appropriate launch behavior, durable draft fields, and consistent product language.
-7. [Sampling Information, End to End — ~15–20 hours](/portfolio/portfolio-10/). I carried a human-authored sampling field across schema, permissions, launch, setup, and end-to-end tests.
-8. [Dial Testing Activation — ~10–14 hours](/portfolio/portfolio-11/). I delivered the schema and eligibility-gated editor control for a larger behavioral-data feature.
-9. [Survey Setup Usability Improvements — ~25–32 hours](/portfolio/portfolio-12/). I improved instructions, dependency visibility, video sizing, and bulk segment workflows.
-10. [Production Reliability and Debugging — ~25–32 hours](/portfolio/portfolio-13/). I corrected lifecycle timing, automation email delivery, null-data handling, and organization-context lookup.
-11. [Developer Environment and Onboarding — ~20–28 hours](/portfolio/portfolio-14/). I improved Docker runtime consistency, environment examples, service documentation, and schema-failure diagnosis.
-12. [Customer Support and Production Operations — ~30–40 hours](/portfolio/portfolio-15/). I handled analysis, configuration, access, metric, and segmentation requests with evidence-based operational practice.
-13. [AI Feature Rollout and Access — ~5–8 hours](/portfolio/portfolio-16/). I removed a redundant AI Toplines flag and supported access verification while accurately limiting the claim to presentation and rollout.
+1. [Substantiveness Classification Pipeline — ~120–150 hours](/portfolio/portfolio-02/). I built a multi-stage LLM pipeline for question intent, response type, and substantiveness classification with schema, Celery, API, prompt, and batch-runner work.
+2. [Sentiment and Relevance Automation — ~35–45 hours](/portfolio/portfolio-03/). I hardened inherited classifier work into a scheduled, observable, retryable Celery pipeline.
+3. [Autoprogram: Google Doc Question Extraction — ~40–50 hours](/portfolio/portfolio-04/). I developed and evaluated an unmerged information-extraction prototype and documented why the next architecture should change.
+4. [Article Highlighter Collection — ~45–55 hours](/portfolio/portfolio-05/). I implemented major full-stack layers for collecting structured human text-span annotations.
+5. [Launch-Page Autosave — ~12–16 hours](/portfolio/portfolio-06/). I built concurrency-safe persistence and unified save-state feedback.
+6. [Enterprise Self-Serve and Test Designs — ~35–45 hours](/portfolio/portfolio-07/). I contributed role-appropriate launch behavior, durable draft fields, and consistent product language.
+7. [Sampling Information, End to End — ~15–20 hours](/portfolio/portfolio-08/). I carried a human-authored sampling field across schema, permissions, launch, setup, and end-to-end tests.
+8. [Dial Testing Activation — ~10–14 hours](/portfolio/portfolio-09/). I delivered the schema and eligibility-gated editor control for a larger behavioral-data feature.
+9. [Survey Setup Usability Improvements — ~25–32 hours](/portfolio/portfolio-10/). I improved instructions, dependency visibility, video sizing, and bulk segment workflows.
+10. [Production Reliability and Debugging — ~25–32 hours](/portfolio/portfolio-11/). I corrected lifecycle timing, automation email delivery, null-data handling, and organization-context lookup.
+11. [Developer Environment and Onboarding — ~20–28 hours](/portfolio/portfolio-12/). I improved Docker runtime consistency, environment examples, service documentation, and schema-failure diagnosis.
+12. [Customer Support and Production Operations — ~30–40 hours](/portfolio/portfolio-13/). I handled analysis, configuration, access, metric, and segmentation requests with evidence-based operational practice.
+13. [AI Feature Rollout and Access — ~5–8 hours](/portfolio/portfolio-14/). I removed a redundant AI Toplines flag and supported access verification while accurately limiting the claim to presentation and rollout.
 
 Team Enablement was considered as a possible additional theme but was intentionally not written as a standalone portfolio entry. COR-43, COR-77, and ENG-1016 are supporting context for collaboration and internal enablement. Their learning is incorporated into this overview and the professional-practice sections of the technical themes.
 
