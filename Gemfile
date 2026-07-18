@@ -27,3 +27,10 @@ group :jekyll_plugins do
 end
 
 gem "webrick", "~> 1.8"
+
+# Standard-library gems removed from default gems in Ruby >= 3.4,
+# still required by Jekyll 3.9 / github-pages
+gem "csv"
+gem "base64"
+gem "bigdecimal"
+gem "logger"

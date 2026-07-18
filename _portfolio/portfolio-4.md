@@ -1,8 +1,10 @@
 ---
-title: "Substantiveness Classification for Open-End Survey Responses"
-excerpt: "Built a multi-stage LLM classification pipeline that evaluates the depth and quality of open-ended survey responses, categorizing them into four tiers of substantiveness. The system spans two microservices, introduces a new MongoDB schema dimension, and integrates with an existing async classification infrastructure via Celery task orchestration.<br/><img src='/images/500x300.png'>"
+title: "Substantiveness Classification Pipeline (~120–150 hours)"
+excerpt: "<strong>Estimated effort: ~120–150 hours.</strong> Built a multi-stage LLM classification pipeline that evaluates the depth and quality of open-ended survey responses, categorizing them into four tiers of substantiveness. The system spans two microservices, introduces a new MongoDB schema dimension, and integrates with an existing async classification infrastructure via Celery task orchestration.<br/><img src='/images/500x300.png'>"
 collection: portfolio
 ---
+
+**Estimated effort: ~120–150 hours** (from Linear In Progress span Nov 2025–Jan 2026, PR #2796 size of 57 files / +5,908 lines, and grouping prior)
 
 ## Project Overview
 
@@ -59,6 +61,7 @@ The most important design decision in this project was introducing a prerequisit
 
 The question-level prerequisite was handled separately. A new `QuestionIntent` enum was added to the codebase with four values — `opinion`, `recall`, `entity_list`, and `attribute_list` — and a backfill script used LLM classification to retrospectively label all existing open-ended questions in MongoDB. The `classify_question_intent` function below handles a single question:
 
+{% raw %}
 ```python
 # From bin/migrate/backfill_question_intent_opinion.py
 
@@ -112,6 +115,7 @@ def classify_question_intent(question_text: str, survey_context: str, asker: Any
     except json.JSONDecodeError:
         return ""
 ```
+{% endraw %}
 
 This prompt was crafted deliberately. Each category is described in terms of what the *researcher* wants, not what the *respondent* says — a subtle but important distinction that reduces ambiguous classifications on edge-case questions. The categories are mutually exclusive and exhaustive by design.
 
@@ -119,6 +123,7 @@ This prompt was crafted deliberately. Each category is described in terms of wha
 
 The substantiveness classifier uses Jinja2 templating to produce structured, context-aware prompts. The primary template (`substantiveness_opinion.jinja`) branches on `response_type` and applies a strict decision rubric for opinion responses:
 
+{% raw %}
 ```jinja2
 {# From swayable_data/io/llm/templates/substantiveness_opinion.jinja #}
 
@@ -156,6 +161,7 @@ Return a JSON dictionary ONLY:
   Minimally Substantive, Insubstantive>"}
 {% endif %}
 ```
+{% endraw %}
 
 Several design choices here were deliberate. First, the tie-breaker rule biases toward conservatism — an LLM that is uncertain should under-classify, because inflating substantiveness would give researchers a false sense of data quality. Second, the output format is restricted to a JSON dictionary with no surrounding reasoning, which makes parsing reliable and reduces token costs. Third, survey context and the original question text are injected into every prompt so the model can evaluate depth *relative to what was asked*, not in the abstract.
 
