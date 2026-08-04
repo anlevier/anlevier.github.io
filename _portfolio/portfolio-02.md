@@ -264,6 +264,10 @@ The core task is **text classification** using a large language model as the cla
 - **Flask** — Web framework for the new `POST /qualitative_analysis` endpoint
 - **uv** — Project Python package manager used to run scripts with environment injection
 
+### 4. Professional Skills
+
+This work was team-based code development rather than a solitary prototype. The feature was scoped and tracked in Linear (ENG-1637), implemented across the Node.js `swaypi` and Python `swayable-data` services, and shipped through GitHub PR #2796 after iterative review with a senior engineer — 92 commits of revision rather than a single unchecked push. Written communication was part of the deliverable: the PR description framed the architecture and staging decisions for reviewers, and a runbook-style `README.md` under `bin/runbook/documentation/` documented workflows, backfill procedures, and operational practices so teammates could operate the pipeline without relying on tribal knowledge. Following existing Celery, DAO, and strategy-pattern conventions instead of inventing parallel abstractions was itself a professional judgment call — it kept the change reviewable and maintainable within the shared codebase. Cost-control flags (`--dry-run`, `--limit`) further reflect workplace practice: protecting shared LLM spend and making review feedback cheap to verify during prompt iteration.
+
 ---
 
 ## Challenges and Solutions

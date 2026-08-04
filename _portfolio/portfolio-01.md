@@ -96,4 +96,36 @@ This overview and its theme structure may be adjusted if my academic advisor req
 
 ## Code Reference
 
-All Swayable source repositories and issue records referenced by these pages are private. Individual theme pages link authorized viewers to the relevant pull requests and provide sanitized pseudocode or descriptions. No credentials, customer data, private record identifiers, or proprietary source excerpts are reproduced in this portfolio.
+All Swayable source repositories and issue records referenced by these pages are private. This overview aggregates a few representative artifacts for evaluators; the theme pages contain the full write-ups, additional snippets, and complete pull-request lists. The examples below are sanitized pseudocode drawn from those entries. No credentials, customer data, private record identifiers, or proprietary source excerpts are reproduced.
+
+### Representative snippets
+
+Staged qualitative classification orchestration (sanitized; see [Substantiveness Classification](/portfolio/portfolio-02/)):
+
+```python
+def run_qualitative_pipeline(survey_id):
+    opinion_count = backfill_question_intent(survey_id)
+    classify_relevance(survey_id)
+    classify_sentiment(survey_id)
+    classify_response_type(survey_id)
+    if opinion_count > 0:
+        classify_substantiveness(survey_id)
+```
+
+Audience-scoped GraphQL field selection for a human-authored sampling field (sanitized; see [Sampling Information](/portfolio/portfolio-08/)):
+
+```javascript
+const adminFields = ["title", "status", "sampleDescription"]
+const clientFields = ["title", "status"]
+```
+
+### Key pull requests
+
+Authorized viewers may open these merged pull requests. Additional links appear on the corresponding theme pages.
+
+- [swayable-data #2796](https://github.com/swayable/swayable-data/pull/2796) — multi-stage substantiveness classification pipeline
+- [swayable-data #2745](https://github.com/swayable/swayable-data/pull/2745) — cron-based sentiment and relevance automation
+- [ui #2307](https://github.com/swayable/ui/pull/2307) / [swaypi #1744](https://github.com/swayable/swaypi/pull/1744) — end-to-end sampling-instructions field (UI through schema)
+- [ui #2370](https://github.com/swayable/ui/pull/2370) / [swaypi #1759](https://github.com/swayable/swaypi/pull/1759) — quiz integration and generation for structured text-span collection
+- [ui #2405](https://github.com/swayable/ui/pull/2405) — launch-page autosave and unified save-state feedback
+- [swayable-data #3023](https://github.com/swayable/swayable-data/pull/3023) — results notification tied to final analysis completion
