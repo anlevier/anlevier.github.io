@@ -7,10 +7,10 @@
 
 # Site Settings
 locale                   : "en-US"
-title                    : "Swayable Internship"
+title                    : "Ashton Levier Portfolio"
 title_separator          : "-"
 name                     : &name "Ashton Levier"
-description              : &description "personal description"
+description              : &description "MSHLT internship portfolio — software engineering work at Swayable."
 url                      : https://anlevier.github.io # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
 repository               : "anlevier.github.io"

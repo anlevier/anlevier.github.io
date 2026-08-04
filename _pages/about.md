@@ -1,6 +1,6 @@
 ---
 permalink: /
-title: "This is a ready-to-use GitHub Pages template for UAZHLT professional websites"
+# No page.title: browser tab uses site.title ("Ashton Levier Portfolio") only
 excerpt: "About me"
 author_profile: true
 redirect_from: 

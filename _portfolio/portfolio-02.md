@@ -288,8 +288,11 @@ The pull request was merged into `main` on February 9, 2026. The feature deliver
 
 ## Code Reference
 
-The work for this project is in a private repository. The pull request is available to authorized viewers here:
+The work for this project is in a private repository. Evaluators without Swayable org access can read a sanitized PR description locally; authorized viewers can open the original GitHub pull request:
 
-[View Pull Request on GitHub — ENG-1637 Substantiveness Classification](https://github.com/swayable/swayable-data/pull/2796)
+- [Sanitized PR description — swayable-data #2796](/pr-descriptions/swayable-data-2796/)
+- [Original GitHub PR (private / org-restricted) — ENG-1637 Substantiveness Classification](https://github.com/swayable/swayable-data/pull/2796)
+
+A full index of archived PR descriptions is at [/pr-descriptions/](/pr-descriptions/).
 
 Because the repository is private, the key implementation files are reproduced inline above: the intent classification backfill script (`bin/migrate/backfill_question_intent_opinion.py`), the Jinja2 prompt template (`swayable_data/io/llm/templates/substantiveness_opinion.jinja`), the Celery task orchestrator (`swayable_data/services/classification/qualitative_analysis_runner.py`), and the classifier entry point (`swayable_data/services/classification/classifiers/quals/substantiveness_classifier.py`).

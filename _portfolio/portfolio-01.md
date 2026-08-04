@@ -121,11 +121,11 @@ const clientFields = ["title", "status"]
 
 ### Key pull requests
 
-Authorized viewers may open these merged pull requests. Additional links appear on the corresponding theme pages.
+The GitHub links below are private (Swayable org access required). Each item also links to a [sanitized local PR description](/pr-descriptions/) that evaluators can read without org access. Additional links appear on the corresponding theme pages.
 
-- [swayable-data #2796](https://github.com/swayable/swayable-data/pull/2796) — multi-stage substantiveness classification pipeline
-- [swayable-data #2745](https://github.com/swayable/swayable-data/pull/2745) — cron-based sentiment and relevance automation
-- [ui #2307](https://github.com/swayable/ui/pull/2307) / [swaypi #1744](https://github.com/swayable/swaypi/pull/1744) — end-to-end sampling-instructions field (UI through schema)
-- [ui #2370](https://github.com/swayable/ui/pull/2370) / [swaypi #1759](https://github.com/swayable/swaypi/pull/1759) — quiz integration and generation for structured text-span collection
-- [ui #2405](https://github.com/swayable/ui/pull/2405) — launch-page autosave and unified save-state feedback
-- [swayable-data #3023](https://github.com/swayable/swayable-data/pull/3023) — results notification tied to final analysis completion
+- Multi-stage substantiveness classification pipeline — [sanitized description](/pr-descriptions/swayable-data-2796/) · [GitHub PR (private)](https://github.com/swayable/swayable-data/pull/2796) (`swayable-data` #2796)
+- Cron-based sentiment and relevance automation — [sanitized description](/pr-descriptions/swayable-data-2745/) · [GitHub PR (private)](https://github.com/swayable/swayable-data/pull/2745) (`swayable-data` #2745)
+- End-to-end sampling-instructions field (UI through schema) — [ui sanitized](/pr-descriptions/ui-2307/) · [GitHub ui #2307 (private)](https://github.com/swayable/ui/pull/2307) · [swaypi sanitized](/pr-descriptions/swaypi-1744/) · [GitHub swaypi #1744 (private)](https://github.com/swayable/swaypi/pull/1744)
+- Quiz integration and generation for structured text-span collection — [ui sanitized](/pr-descriptions/ui-2370/) · [GitHub ui #2370 (private)](https://github.com/swayable/ui/pull/2370) · [swaypi sanitized](/pr-descriptions/swaypi-1759/) · [GitHub swaypi #1759 (private)](https://github.com/swayable/swaypi/pull/1759)
+- Launch-page autosave and unified save-state feedback — [sanitized description](/pr-descriptions/ui-2405/) · [GitHub PR (private)](https://github.com/swayable/ui/pull/2405) (`ui` #2405)
+- Results notification tied to final analysis completion — [sanitized description](/pr-descriptions/swayable-data-3023/) · [GitHub PR (private)](https://github.com/swayable/swayable-data/pull/3023) (`swayable-data` #3023)
