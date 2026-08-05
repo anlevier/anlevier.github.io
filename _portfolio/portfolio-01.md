@@ -1,6 +1,6 @@
 ---
 title: "Swayable Internship Overview (~420–545 hours across themes)"
-excerpt: "<strong>Estimated effort: ~420–545 hours across themes.</strong> A canonical overview of my Swayable software engineering internship, connecting production NLP, full-stack product delivery, reliability, research prototypes, developer enablement, and customer operations.<br/><img src='/images/500x300.png'>"
+excerpt: "<strong>Estimated effort: ~420–545 hours across themes.</strong> A canonical overview of my Swayable software engineering internship, connecting production NLP, full-stack product delivery, reliability, research prototypes, developer enablement, and customer operations."
 collection: portfolio
 ---
 

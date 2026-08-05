@@ -1,6 +1,6 @@
 ---
 title: "Substantiveness Classification Pipeline (~120–150 hours)"
-excerpt: "<strong>Estimated effort: ~120–150 hours.</strong> Built a multi-stage LLM classification pipeline that evaluates the depth and quality of open-ended survey responses, categorizing them into four tiers of substantiveness. The system spans two microservices, introduces a new MongoDB schema dimension, and integrates with an existing async classification infrastructure via Celery task orchestration.<br/><img src='/images/500x300.png'>"
+excerpt: "<strong>Estimated effort: ~120–150 hours.</strong> Built a multi-stage LLM classification pipeline that evaluates the depth and quality of open-ended survey responses, categorizing them into four tiers of substantiveness. The system spans two microservices, introduces a new MongoDB schema dimension, and integrates with an existing async classification infrastructure via Celery task orchestration."
 collection: portfolio
 ---
 

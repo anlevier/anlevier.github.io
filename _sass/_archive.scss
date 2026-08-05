@@ -27,6 +27,22 @@
   }
 }
 
+/* In-column banner (e.g. portfolio listings) — matches .archive width, not full-bleed */
+.archive__banner {
+  margin: 0 0 1.5em;
+  width: 100%;
+  overflow: hidden;
+}
+
+.archive__banner-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 12.5rem;
+  object-fit: cover;
+  object-position: center;
+}
+
 .archive__subtitle {
   margin: 1.414em 0 0;
   padding-bottom: 0.5em;

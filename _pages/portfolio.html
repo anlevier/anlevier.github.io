@@ -3,12 +3,19 @@ layout: archive
 title: "Portfolio"
 permalink: /portfolio/
 author_profile: true
+hide_page_title: true
 ---
 
 {% include base_path %}
 
+<div class="archive__banner">
+  <img
+    src="{{ base_path }}/images/portfolio-banner.jpg"
+    alt=""
+    class="archive__banner-image"
+  >
+</div>
 
 {% for post in site.portfolio %}
   {% include archive-single.html %}
 {% endfor %}
-

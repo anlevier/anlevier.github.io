@@ -1,6 +1,6 @@
 ---
 title: "Article Highlighter Collection (~45–55 hours)"
-excerpt: "<strong>Estimated effort: ~45–55 hours.</strong> A full-stack alpha feature for configuring article-highlight collection, adding the experience to respondent quizzes, and safely carrying span annotations and comments through the quiz store.<br/><img src='/images/500x300.png'>"
+excerpt: "<strong>Estimated effort: ~45–55 hours.</strong> A full-stack alpha feature for configuring article-highlight collection, adding the experience to respondent quizzes, and safely carrying span annotations and comments through the quiz store."
 collection: portfolio
 ---
 

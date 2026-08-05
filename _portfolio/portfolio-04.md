@@ -1,6 +1,6 @@
 ---
 title: "Autoprogram: Google Doc Question Extraction (~40–50 hours)"
-excerpt: "<strong>Estimated effort: ~40–50 hours.</strong> I built a research prototype that transformed semi-structured Google Doc survey plans into typed question JSON and compared the output with configured MongoDB surveys. The prototype established an evaluation harness and exposed the limitations of brittle regex extraction; it was reviewed but never merged.<br/><img src='/images/500x300.png'>"
+excerpt: "<strong>Estimated effort: ~40–50 hours.</strong> I built a research prototype that transformed semi-structured Google Doc survey plans into typed question JSON and compared the output with configured MongoDB surveys. The prototype established an evaluation harness and exposed the limitations of brittle regex extraction; it was reviewed but never merged."
 collection: portfolio
 ---
 

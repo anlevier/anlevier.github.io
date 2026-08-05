@@ -1,6 +1,6 @@
 ---
 title: "Customer Support and Production Operations (~30–40 hours)"
-excerpt: "<strong>Estimated effort: ~30–40 hours.</strong> Investigated urgent production-analysis, configuration, access, metric, and segmentation requests while communicating evidence, impact, and resolution status across teams.<br/><img src='/images/500x300.png'>"
+excerpt: "<strong>Estimated effort: ~30–40 hours.</strong> Investigated urgent production-analysis, configuration, access, metric, and segmentation requests while communicating evidence, impact, and resolution status across teams."
 collection: portfolio
 ---
 

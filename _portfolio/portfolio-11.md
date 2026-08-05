@@ -1,6 +1,6 @@
 ---
 title: "Production Reliability and Debugging (~25–32 hours)"
-excerpt: "<strong>Estimated effort: ~25–32 hours.</strong> Diagnosed lifecycle, data-integrity, automation, and organization-context failures across Swayable services, then implemented focused safeguards and regression coverage.<br/><img src='/images/500x300.png'>"
+excerpt: "<strong>Estimated effort: ~25–32 hours.</strong> Diagnosed lifecycle, data-integrity, automation, and organization-context failures across Swayable services, then implemented focused safeguards and regression coverage."
 collection: portfolio
 ---
 

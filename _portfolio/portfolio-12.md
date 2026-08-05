@@ -1,6 +1,6 @@
 ---
 title: "Developer Environment and Onboarding (~20–28 hours)"
-excerpt: "<strong>Estimated effort: ~20–28 hours.</strong> Improved Swayable onboarding through Docker runtime alignment, environment examples, service documentation, and diagnosis of schema-dependent Cypress setup failures.<br/><img src='/images/500x300.png'>"
+excerpt: "<strong>Estimated effort: ~20–28 hours.</strong> Improved Swayable onboarding through Docker runtime alignment, environment examples, service documentation, and diagnosis of schema-dependent Cypress setup failures."
 collection: portfolio
 ---
 

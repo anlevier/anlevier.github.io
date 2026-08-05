@@ -1,6 +1,6 @@
 ---
 title: "AI Feature Rollout and Access (~5–8 hours)"
-excerpt: "<strong>Estimated effort: ~5–8 hours.</strong> Removed a redundant AI Toplines feature flag, verified data-driven rendering, and supported controlled access to AI summaries and presentation capabilities.<br/><img src='/images/500x300.png'>"
+excerpt: "<strong>Estimated effort: ~5–8 hours.</strong> Removed a redundant AI Toplines feature flag, verified data-driven rendering, and supported controlled access to AI summaries and presentation capabilities."
 collection: portfolio
 ---
 

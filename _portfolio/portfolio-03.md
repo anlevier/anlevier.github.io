@@ -1,6 +1,6 @@
 ---
 title: "Sentiment and Relevance Automation (~35–45 hours)"
-excerpt: "<strong>Estimated effort: ~35–45 hours.</strong> I hardened an earlier sentiment and relevance prototype into a scheduled NLP batch-classification pipeline. The work emphasized safe production operation through Celery orchestration, explicit queue and retry policies, observability, staged rollout, and review-driven configuration controls.<br/><img src='/images/500x300.png'>"
+excerpt: "<strong>Estimated effort: ~35–45 hours.</strong> I hardened an earlier sentiment and relevance prototype into a scheduled NLP batch-classification pipeline. The work emphasized safe production operation through Celery orchestration, explicit queue and retry policies, observability, staged rollout, and review-driven configuration controls."
 collection: portfolio
 ---
 

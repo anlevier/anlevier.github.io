@@ -1,6 +1,6 @@
 ---
 title: "Launch-Page Autosave (~12–16 hours)"
-excerpt: "<strong>Estimated effort: ~12–16 hours.</strong> A concurrency-safe launch-page autosave workflow that preserved edits made during in-flight requests and provided one reusable, retryable status indicator.<br/><img src='/images/500x300.png'>"
+excerpt: "<strong>Estimated effort: ~12–16 hours.</strong> A concurrency-safe launch-page autosave workflow that preserved edits made during in-flight requests and provided one reusable, retryable status indicator."
 collection: portfolio
 ---
 
