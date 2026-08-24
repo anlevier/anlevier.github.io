@@ -56,9 +56,9 @@ Team Enablement was considered as a possible additional theme but was intentiona
 
 ## Results and Contributions
 
-The most substantial NLP outcome was a production-oriented classification system for open-ended survey responses. The substantiveness project introduced typed qualitative dimensions and a conditional multi-stage path for applying them. The sentiment and relevance project established safe periodic execution with durable retry semantics. Together, these projects connected NLP concepts to production concerns such as cost, queue behavior, schema evolution, and observable completion.
+The most substantial NLP outcome was a production-oriented classification system for open-ended survey responses. The substantiveness project introduced typed qualitative dimensions and a conditional multi-stage path for applying them. The sentiment and relevance project was designed to run on a recurring schedule: each cycle finds survey responses that still need labels, enqueues classification jobs, and leaves failed items unmarked so a later cycle can pick them up again. That design avoids duplicate work on already-labeled responses and avoids silently dropping failures. Together, these projects connected NLP concepts to production concerns such as cost, queue behavior, schema evolution, and observable completion.
 
-The full-stack work delivered several user-facing capabilities. Survey authors gained configuration paths for article highlighting, sampling information, Dial Testing activation, custom instructions, and launch workflow improvements. Respondent and analyst experiences gained viewport-safe media, structured highlight data, visible dependencies, and bulk configuration actions. I report these as scoped contributions within a larger platform rather than claiming ownership of the platform or complete product initiatives.
+The full-stack work delivered several user-facing capabilities. One of the larger ones was Article Highlighter collection: a survey editor can turn on highlighting for an eligible markdown article (for example a news-style treatment shown in a persuasion test), and respondents then read that article, select spans of text, optionally mark sentiment and leave a comment, and continue the quiz. Those spans become structured annotation data for later qualitative analysis—seeing which passages drew attention or reaction—rather than free-form open ends alone. “Placebo” here means a control treatment in an A/B-style test; highlighter pages are not shown for placebo or non-markdown content because character offsets into a control article would not support the intended analysis. Survey authors also gained configuration paths for sampling information, Dial Testing activation, custom instructions, and launch workflow improvements. Respondent and analyst experiences gained viewport-safe media, structured highlight data, visible dependencies, and bulk configuration actions. I report these as scoped contributions within a larger platform rather than claiming ownership of the platform or complete product initiatives.
 
 The reliability work corrected concrete failure modes across services: a notification tied to the wrong lifecycle event, real email delivery to automation users, a null dereference caused by deleted child data, and an undefined organization identifier that blocked a client results workflow. These changes taught me that small diffs can carry significant diagnostic and operational value.
 
@@ -74,7 +74,7 @@ I gained experience delivering software in mature repositories with existing con
 
 ### 2. Human Language Technology Theory and Practice
 
-The internship connected HLT theory to practical systems. Text classification appeared as zero-shot LLM prompting, cascaded gating, sentiment, relevance, response-type, and substantiveness labels. Information extraction appeared in the autoprogram prototype through segmentation, normalization, weak structural cues, schema mapping, and approximate matching. Human annotation appeared in Article Highlighter spans and comments.
+The internship connected HLT theory to practical systems. Text classification appeared as zero-shot LLM prompting, cascaded gating, sentiment, relevance, response-type, and substantiveness labels. Information extraction appeared in the autoprogram prototype as a pipeline over survey-planning *documents* (Google Docs / Markdown), not over respondent answer data: the system split a document into sections (segmentation), cleaned and standardized headers and question text (normalization), used table structure and markers as weak cues, mapped those pieces into a typed survey-question schema, and compared extracted questions to already-configured MongoDB surveys with lenient text matching. Human annotation appeared in Article Highlighter spans and comments.
 
 The strongest theory-to-practice lesson was that model behavior and system behavior are inseparable in production. A classifier may be conceptually sound but operationally unreliable if tasks duplicate, failures disappear, irrelevant records consume model calls, or completion is announced too early. Conversely, a feature can support language technology without training a model, as when software reliably collects text spans, preserves human-authored instructions, or presents generated summaries only when valid output exists.
 
@@ -84,15 +84,13 @@ I worked with Vue, GraphQL, Node.js, Python, Flask, Celery, MongoDB, Mongoose, J
 
 ### 4. Professional Communication and Judgment
 
-I learned to communicate status precisely: merged, unmerged, diagnosed, proposed, tested, or operationally completed. I practiced sanitizing private information, separating user impact from root cause, identifying collaborative ownership, and recording testing limits. Review and support work also strengthened prioritization under uncertainty. I learned that urgency increases the need for concise evidence; it does not reduce the need for it.
+I learned to communicate status precisely: merged, unmerged, diagnosed, proposed, tested, or operationally completed. I practiced sanitizing private information, separating user impact from root cause, identifying collaborative ownership, and recording testing limits. Review and support work also strengthened my ability to prioritize my own tasks when requirements or urgency were unclear. I learned that urgency increases the need for concise evidence; it does not reduce the need for it.
 
 ## Professional Practice and Reflection
 
 Across the internship, I moved from understanding individual services to reasoning about boundaries among systems, teams, and product states. I became more comfortable entering an unfamiliar code path, reconstructing its invariant, and choosing evidence that could prove a correction. I also became more willing to remove code, close an unsuitable implementation path, or describe a small contribution honestly.
 
 The internship confirmed that Human Language Technology work in industry includes much more than model training. Production HLT depends on software architecture, data contracts, asynchronous execution, interfaces, monitoring, access, and support. My strongest contributions combined language-technology understanding with disciplined software engineering.
-
-This overview and its theme structure may be adjusted if my academic advisor requests a different internship-report format. Pending that format approval, this page serves as the canonical summary, and the linked entries provide the detailed evidence.
 
 ## Code Reference
 

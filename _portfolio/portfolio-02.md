@@ -59,7 +59,11 @@ Stage 3b runs only when Stage 0 confirms that the survey contains at least one q
 
 The most important design decision in this project was introducing a prerequisite classification step before substantiveness scoring. Substantiveness is only meaningful for opinion-type responses — asking whether a respondent who listed brand attributes gave a "highly substantive" answer makes no conceptual sense. To enforce this constraint, I built a `ResponseTypeClassifier` that determines whether a response is opinion-based before the `SubstantivenessClassifier` runs. Both classifiers invoke a large language model through the platform's shared `LlmAskerPicker` abstraction, which routes requests to the appropriate provider.
 
-The question-level prerequisite was handled separately. A new `QuestionIntent` enum was added to the codebase with four values — `opinion`, `recall`, `entity_list`, and `attribute_list` — and a backfill script used LLM classification to retrospectively label all existing open-ended questions in MongoDB. The `classify_question_intent` function below handles a single question:
+The question-level prerequisite was handled separately. A new `QuestionIntent` enum was added to the codebase with four values — `opinion`, `recall`, `entity_list`, and `attribute_list` — and a backfill script used LLM classification to retrospectively label all existing open-ended questions in MongoDB.
+
+Why four values instead of a binary opinion / non-opinion flag? For *this* pipeline, substantiveness only runs when intent is `opinion`, so a boolean would have been enough to gate Stage 3b. The four-way taxonomy still mattered for accurate labeling and for the platform schema. Open-ended survey questions are written for different research goals—list brands or people (`entity_list`), list attributes associated with something (`attribute_list`), recall details of the stimulus (`recall`), or give a personal viewpoint (`opinion`). Those goals are mutually exclusive in the prompt, so the classifier is not forced to jam a brand-list question into the same “non-opinion” bucket as a recall question. Storing the finer label on `questions.intent` also leaves room for later classifiers that should behave differently by intent (for example, a list-oriented analyzer) without another schema migration. In short: substantiveness consumes the opinion distinction today; the other three values are a deliberate, mutually exclusive inventory of non-opinion open ends, not unused speculation without a design purpose.
+
+The `classify_question_intent` function below handles a single question:
 
 {% raw %}
 ```python
@@ -135,6 +139,15 @@ You are a reasoning model performing a *substantiveness classification* of a sur
 - Survey question: {{survey_question}}
 - Survey response: {{response}}
 
+## TASK
+Classify the response into **one** of four categories:
+1. **Highly Substantive**
+2. **Moderately Substantive**
+3. **Minimally Substantive**
+4. **Insubstantive**
+
+If the question or response is not in English, first detect language and briefly translate before classifying.
+
 ## DECISION RULES
 - **Highly Substantive**
   - Contains a clear opinion AND at least one thoughtful supporting element:
@@ -163,7 +176,9 @@ Return a JSON dictionary ONLY:
 ```
 {% endraw %}
 
-Several design choices here were deliberate. First, the tie-breaker rule biases toward conservatism — an LLM that is uncertain should under-classify, because inflating substantiveness would give researchers a false sense of data quality. Second, the output format is restricted to a JSON dictionary with no surrounding reasoning, which makes parsing reliable and reduces token costs. Third, survey context and the original question text are injected into every prompt so the model can evaluate depth *relative to what was asked*, not in the abstract.
+Several design choices here were deliberate. First, the tie-breaker rule biases toward conservatism — when two labels seem plausible, the model should choose the less substantive one, because over-labeling depth would give researchers a false sense of data quality. Second, the output format is restricted to a JSON dictionary with no surrounding reasoning, which makes parsing reliable and reduces token costs. Third, survey context and the original question text are injected into every prompt so the model can evaluate depth *relative to what was asked*, not in the abstract. Fourth, the multilingual instruction (detect language and briefly translate before classifying) is part of the same template so non-English open ends stay in the same pipeline rather than being skipped.
+
+I did not treat prompt wording alone as proof of accuracy. Alongside iterative review, I built helper scripts for cost-controlled dry runs and a dedicated accuracy harness (`test_substantiveness_accuracy.py`) that scores the substantiveness prompt against manually labeled YAML cases (default fixture: `eval/cases/substantiveness-real.yaml`). That harness compares model categories to expected labels, can show misclassification examples, and supported prompt iteration before relying on the under-classify tie-breaker in production. I am not publishing a single accuracy percentage here because the private labeled set and model versions are internal; the point for this write-up is that confidence came from labeled evaluation and conservative rubric design, not from unverified prompt intuition.
 
 ### Celery Task Orchestration
 
@@ -252,7 +267,7 @@ This project was tracked end-to-end through Linear (ticket ENG-1637) and GitHub 
 
 ### 2. Fundamental NLP Algorithms and Concepts
 
-The core task is **text classification** using a large language model as the classifier. Rather than training a supervised model, the system uses **zero-shot prompt-based classification** — the classification rubric is embedded directly in the prompt and the LLM generalizes from its pretraining. This approach trades the need for labeled training data (expensive to collect for niche survey content) against the cost and latency of LLM API calls. The two-stage pipeline also reflects a fundamental NLP pattern: **cascaded classification**. Applying a coarse classifier first (question intent, then response type) before running the fine-grained classifier (substantiveness) mirrors production NLP systems where cheaper upstream filters reduce the load on more expensive downstream models. The system also handles multilingual input — the prompt explicitly instructs the model to detect and translate non-English responses before classifying.
+The core task is **text classification** using a large language model as the classifier. Rather than training a supervised model, the system uses **zero-shot prompt-based classification** — the classification rubric is embedded directly in the prompt and the LLM generalizes from its pretraining. This approach trades the need for labeled training data (expensive to collect for niche survey content) against the cost and latency of LLM API calls. The two-stage pipeline also reflects a fundamental NLP pattern: **cascaded classification**. Applying a coarse classifier first (question intent, then response type) before running the fine-grained classifier (substantiveness) mirrors production NLP systems where cheaper upstream filters reduce the load on more expensive downstream models. Multilingual open ends are handled in the substantiveness prompt itself: when the question or response is not in English, the model is instructed to detect the language and briefly translate before applying the same rubric (see the Jinja excerpt above).
 
 ### 3. Tools and Packages
 
@@ -282,7 +297,7 @@ A secondary challenge was cost control during development. The LLM API charges p
 
 ## Outcomes and Impact
 
-The pull request was merged into `main` on February 9, 2026. The feature delivers a new dimension of qualitative signal — response substantiveness — that is now available for every opinion question in the Swayable platform. Researchers can filter survey results to surface only `highlySubstantive` responses, reducing the manual effort required to identify analytically useful answers in large open-end datasets. The new `POST /qualitative_analysis` endpoint integrates substantiveness into the existing automated classification pipeline alongside relevance and sentiment, so future surveys receive the full suite of qualitative labels without additional operator intervention. The `QuestionIntent` schema field also lays groundwork for future classifiers that may behave differently depending on what a question is designed to measure.
+The pull request was merged into `main` on February 9, 2026. The feature delivers a new dimension of qualitative signal — response substantiveness — that is now available for every opinion question in the Swayable platform. Researchers can filter survey results to surface only `highlySubstantive` responses, reducing the manual effort required to identify analytically useful answers in large open-end datasets. The new `POST /qualitative_analysis` endpoint integrates substantiveness into the existing automated classification pipeline alongside relevance and sentiment, so future surveys receive the full suite of qualitative labels without additional operator intervention. The four-value `QuestionIntent` field stores a durable taxonomy of open-end goals; substantiveness already consumes the `opinion` branch, and the remaining labels keep non-opinion questions distinguishable for future intent-specific tools.
 
 ---
 
