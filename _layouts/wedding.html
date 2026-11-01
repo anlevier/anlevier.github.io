@@ -9,6 +9,17 @@ layout: compress
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ page.title }}</title>
         <link rel="stylesheet" href="{{ base_path }}/assets/bootstrap/bootstrap.min.css">
+        <style>
+            .hero-photo {
+                object-position: center;
+            }
+
+            @media (min-width: 768px) {
+                .hero-photo {
+                    object-position: 46% center;
+                }
+            }
+        </style>
     </head>
     <body>
         {{content}}
